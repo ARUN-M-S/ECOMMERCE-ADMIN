@@ -20,9 +20,24 @@ const verifylogin = (req, res, next) => {
   if (req.session.admin) {
     next();
   } else {
-    res.render("admin/admin-login", { login: false, admin: true });
+    res.render("admin/admin-login", { login:false,noSidebar: true,admin:true, });
   }
 };
+/* GET admin login page. */
+// router.get("/login", function (req, res, next) {
+//   if (req.session.adminLoggedIn) {
+//     res.redirect("/admin");
+//   } else {
+//     res.render("admin/admin-login", {
+//       title: "Admin",
+//       admin: true,
+//       noSidebar: true,
+//       loginErr: req.session.adminLoginErr,
+//     });
+//   }
+//   req.session.adminLoginErr = false;
+// });
+
 
 router.post("/admin-login", (req, res) => {
   if (
@@ -48,12 +63,13 @@ router.get("/", verifylogin, async (req, res) => {
   let Income = await productHelper.getTotalIncome();
   let users = await productHelper.getAlluser();
   let orders = await productHelper.getAllorder();
+  
 
   totalIncome = Income[0].total;
 
-  res.render("admin/admin-home", { home: true, totalIncome, users, orders });
+  res.render("admin/admin-home", { admin:true, totalIncome, users, orders});
 });
-router.get("/products", verifylogin, (req, res) => {
+router.get("/view-product", verifylogin, (req, res) => {
   productHelpers.getAllproducts().then((products) => {
     res.render("admin/view-products", { products, admin: true });
   });
@@ -208,7 +224,7 @@ router.get("/delete-users/:id", (req, res) => {
 
 router.get("/orderss", verifylogin, async(req, res) => {
  await productHelpers.getAllOrders().then((orders) => {
-    console.log(orders[0].Delivered,"manuuuughsgsggss");
+    // console.log(orders[0].Delivered,"manuuuughsgsggss");
     res.render("admin/user-orders", { orders, admin: true });
   });
 });
@@ -252,8 +268,25 @@ router.get("/getChartDates", async (req, res) => {
   let weeklyTotal = await productHelper.getWeeklyTotal();
   let monthlyTotal = await productHelper.getMontlyTotal();
   let yearlyTotal = await productHelper.getYearlyTotal();
+  let weekly=[];
+  let weeklyAmount=[];
+  let monthly=[];
+  let monthlyAmount=[];
+  weeklyTotal.map(daily=>{
+    weekly.push(daily._id)
 
-  res.json({ weeklyTotal, monthlyTotal, yearlyTotal });
+  })
+  weeklyTotal.map(daily=>{
+    weeklyAmount.push(daily.total)
+
+  })
+  monthlyTotal.map(month=>{
+    monthly.push(month._id);
+    monthlyAmount.push(month.total)
+  })
+
+
+  res.json({ weekly,weeklyAmount, monthlyTotal, monthlyAmount,monthly,yearlyTotal });
 });
 // ====================coupen=======
 router.get("/Coupen",async(req,res)=>{
@@ -268,5 +301,44 @@ router.post("/add-Coupen",async(req,res)=>{
 
 })
 // ======================coupondeleting====================
+
+
+router.get('/arunms',(req,res)=>{
+  res.render("admin/admin-dashboard",{admin:true,title:"Admin"})
+})
+
+
+// ===========================categoryManagement=================
+// category management
+var catMsg;
+router.get("/category", verifylogin, function (req, res, next) {
+  
+  productHelper.getCategory().then((allCategory) => {
+    res.render("admin/category", {
+      admin: true,
+      header: "CATEGORY MANAGEMENT",
+      catMsg,
+      subCatMsg,
+      allCategory,
+    });
+    catMsg = null;
+    subCatMsg = null;
+  });
+});
+
+// add category
+router.post("/addCategory", verifylogin, function (req, res, next) {
+  productHelper.addCategory(req.body).then((response) => {
+    catMsg = response;
+    res.redirect("/admin/category");
+  });
+});
+var subCatMsg;
+router.post("/addSubcategory", verifylogin, function (req, res, next) {
+  productHelper.addCategory(req.body).then((response) => {
+    subCatMsg = response;
+    res.redirect("/admin/category");
+  });
+});
 
 module.exports = router;

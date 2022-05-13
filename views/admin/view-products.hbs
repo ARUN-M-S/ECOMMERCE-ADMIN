@@ -1,74 +1,90 @@
-<section style="background-color: antiquewhite; min-height:100vh; width:100%">
-  <div class="container ">
-    
-  <div  style="text-align: center; padding-top:10px; text-decoration: underline;" ><h1>All Products</h1></div>
-
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th scope="col">No</th>
-          <th scope="col">Brand</th>
-          <th scope="col">Category</th>
-          <th scope="col">Description</th>
-          <th scope="col">OP</th>
-          <th scope="col">OfrP</th>
-          <th scope="col">Ofr%</th>
-          <th scope="col">Images</th>
-        </tr>
-      </thead>
-      <tbody>
-        {{#each products}}
+<div class="text-center py-3 bg-green-200">
+  <div class="cover-container">
+    <main class="px-3">
+      <h1>View Products</h1>
+    </main>
+    <div class="px-2 bg-light row my-5 mx-auto">
+        <a href="/admin/add-product" class="btn bg-gray-400 col-2 ms-4 my-4">Add Product</a>
+      <table class="table table-striped" id="viewProducts">
+           {{#if productEditMsg.status}}
+                <p class="alert-success text-center"> {{productEditMsg.msg}}</p>
+              {{else}}
+                {{#if productEditMsg.imageErr}}
+                  <p class="alert-danger text-center"> {{productEditMsg.imageErr}}</p>
+                {{else}}
+                  <p class="alert-danger text-center"> {{productEditMsg.msg}}</p>
+                {{/if}}
+            {{/if}}
+        <thead>
           <tr>
-            <th scope="row">{{inc @index}}</th>
-            <td>
-              {{this.brand}}
-            </td>
-
-            <td>{{this.category}}
-            </td>
-            <td>
-              {{this.description}}
-            </td>
-            <td>
-              {{this.orginalPrice}}
-            </td>
-
-            <td>
-              {{this.offerPrice}}
-            </td>
-            <td>
-              {{this.offerpercentage}}
-            </td>
-            <td><img
-                style="width: 50px; hieght: 50px;"
-                src="/product-images/{{this._id}}.jpg"
-                alt=""
-              />
-
-            </td>
-            <td><img
-                style="width: 50px; hieght: 50px;"
-                src="/product-images1/{{this._id}}.jpg"
-                alt=""
-              />
-
-            </td>
-            <td>
-              <a style="width: 70px;"
-                href="/admin/edit-product/{{this._id}}"
-                class="btn btn-primary w-"
-              >Edit</a>
-              <a
-                href="/admin/delete-product/{{this._id}}"
-                class="btn btn-danger"
-                onclick="return confirm('Are You Want to Delete {{this.brand}}?')"
-              >Delete </a>
-            </td>
+            <th scope="col">NO</th>
+            <th scope="col">PRODUCT</th>
+            <th scope="col">CATEGORY</th>
+            <th scope="col">SUBCATEGORY</th>
+            <th scope="col">BRAND</th>
+            <th scope="col">VARIANT</th>
+            <th scope="col">ACTION</th>
           </tr>
-        {{/each}}
+        </thead>
+        <tbody>
 
-      </tbody>
-    </table>
+          {{#each products}}
+            <tr>
+              <td class="align-middle">{{@index}}</td>
+              <td class="align-middle"> <img src="http://3.145.64.18/images/product-images/{{this._id}}/{{this.productVariants.0.variantId}}_1.webp" width="50px" height="50px">{{this.productName}} </td>
+              <td class="align-middle"> {{this.brand}} </td>
+              <td class="align-middle"> {{this.category}} </td>
+              <td class="align-middle"> {{this.productBrand}} </td>
+              <td class="align-middle">
+                {{#each productVariants}}
+                  <span class="font-bold">Colour: </span>  {{this.productColour}} <i class="fas fa-circle" style="color: {{this.productColour}};"></i> <br>
+                  <span class="font-bold">L.Cost: </span> <span> {{this.landingCost}} </span> <br>
+                  <span class="font-bold">Price: </span> <span> {{this.productPrice}} </span> <br>
+                  <span class="font-bold">Quantity: </span>  <span>{{this.productQuantity}}  </span> <br>
+              {{/each}}
+                  </td>
+              <td class="align-middle">
+                      <a onclick="deleteProduct('{{this._id}}','{{this.productVariants.0.variantId}}')" class="text-danger"><i class="fas fa-trash-alt"></i></a>
+                      <a href="/admin/edit-product?id={{this._id}}&variantId={{this.productVariants.0.variantId}}" class="text-primary ms-2"><i class="far fa-edit"></i></a>
+                      {{!-- <a href="/admin/add-variant?id={{this._id}}" class="text-primary ms-2"><i class="far fa-plus-square"></i></a> --}}
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div> 
   </div>
+</div>
 
-</section>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+<script type="text/javascript">
+// sweet alert for delete product button
+  function deleteProduct(id,varId){ 
+    swal({ 
+      title: "Are you sure?",
+      text:"Once deleted, you will not be able to recover this Product!",
+      icon:"warning",
+      buttons: true,
+      dangerMode: true,
+      })
+      .then((willDelete) => {
+        if(willDelete) { 
+          $.ajax({ 
+            url:"/admin/delete-product",
+            method:"POST",
+            data:{id:id,varId:varId},
+            success:(result)=>{ 
+              if(result.status){
+                swal("User deleted Successfully", {
+                  icon: "success", 
+                });
+              } 
+              location.href='/admin/view-product' 
+            }
+          });
+        }
+      })
+    }
+
+</script>

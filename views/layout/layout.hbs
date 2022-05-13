@@ -47,14 +47,17 @@
   </head>
   <body>
     
-  {{#if admin}}
-    {{>admin-header}}
+
     
-    {{else home}}
-    {{else}}
-    {{>user-header}}
-    
-    {{/if}}
+  {{#if noSidebar}}
+
+      {{else}}
+      {{#if admin}}
+        {{>admin-headers}}
+      {{else}}
+        {{> user-header}}
+      {{/if}}
+      {{/if}}
  {{{body}}}
  {{#if user}}
      {{>user-footer}}
@@ -64,6 +67,16 @@
     
    
     {{/if}}
+     {{#if admin}}
+    <link rel="stylesheet" href="/stylesheets/admin.css" />
+    <link rel="stylesheet" href="/stylesheets/admin1.css" />
+    <link rel="stylesheet" href="/stylesheets/admin2.css" />
+  {{else}}
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+  {{/if}}
+
+
+
 
     <!-- Optional JavaScript; choose one of the two! -->
 

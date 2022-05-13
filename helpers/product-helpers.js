@@ -535,7 +535,64 @@ return new promise (async(resolve,reject)=>{
 
     })
     
-  }
+  },addCategory: (categoryData) => {
+    return new Promise(async (resolve, reject) => {
+      let isCategory = await db
+        .get()
+        .collection(collection.PRODUCT_CATEGORY)
+        .findOne({ category: categoryData.category }); //finds for a document of category in req.body
+
+      if (isCategory) {
+        let dbSubcategory = isCategory.subcategory;
+        let isSub = dbSubcategory.includes(categoryData.subcategory); //checks whether same subcategory is in subcategory array
+
+        if (isSub) {
+          //if same subcategory is in subcategory array shows error
+          resolve({ status: false, msg: "This Subcategory Already Exist" });
+        } else {
+          //else update subcategory of that category
+          await db
+            .get()
+            .collection(collection.PRODUCT_CATEGORY)
+            .updateOne(
+              { category: categoryData.category },
+              { $push: { subcategory: categoryData.subcategory } }
+            );
+
+          resolve({
+            status: true,
+            msg: "Subcategory Added to Existing Category",
+          });
+        }
+      } else {
+        //if thereis no document of category, create category and subcategory
+        await db
+          .get()
+          .collection(collection.PRODUCT_CATEGORY)
+          .insertOne({
+            category: categoryData.category,
+            subcategory: [categoryData.subcategory],
+          });
+        resolve({
+          status: true,
+          msg: "Category Added Successfully",
+        });
+      }
+    });
+  },
+  //   get category datas
+  getCategory: () => {
+    return new Promise(async (resolve, reject) => {
+      let allCategory = await db
+        .get()
+        .collection(collection.PRODUCT_CATEGORY)
+        .find()
+        .toArray();
+      resolve(allCategory);
+    });
+  },
+
+
  
 };
 
